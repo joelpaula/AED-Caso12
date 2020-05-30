@@ -1,0 +1,65 @@
+---
+title: "Caso 12"
+author: "Catarina Castanheira (92478), João Martins (93259), Joel Paula (93392)"
+date: "26/05/2020"
+output: 
+  word_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Ler ficheiro de Excel
+```{r}
+library(openxlsx)
+bd <- read.xlsx("CP12_Ecologia_final.xlsx", sheet = "Dados_Eco1")
+colnames(bd)[17] <- c("Habilitacoes")
+colnames(bd)[2] <- c("Incêndios Florestais")
+bd
+```
+
+# Identificar os valores omissos
+
+Mostrar os Ids das linhas que têm a coluna de idades omissa
+```{r}
+bd$ID[which(is.na(bd$idade))]
+```
+
+# Mediana das idades
+```{r}
+median(bd$idade, na.rm = TRUE)
+```
+Substituir os omissos pela mediana
+```{r}
+bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm = TRUE))
+```
+
+# Analisar descritivamente os dados
+```{r}
+summary(bd)
+```
+
+# Tabela de prequências absolutas
+```{r}
+tab <- table(bd$`Incêndios Florestais`)
+tab
+```
+
+# Tabela de prequências percentuais
+```{r}
+tabpct <- round(prop.table(tab)* 100,2)
+tabpct
+```
+# medidas descritivas de variáveis quantitativas
+```{r}
+summary(bd$idade)
+summary(bd$preoc_ambiente)
+```
+
+# gráficos de distribuição
+```{r}
+boxplot(bd$idade, ylab="Idade", main="Distribuição de idades", col="light blue", ylim = c(0, 100), xlim = c(0,4))
+abline(h=mean(bd$idade), lty="dashed", lwd="0.1", col="grey")
+```
+

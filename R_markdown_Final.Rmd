@@ -1,0 +1,136 @@
+---
+title: "Trabalho_Caso12_AED"
+author: "Catarina Castanheira (92478), João Martins (93259), Joel Paula (93392)"
+output: 
+  word_document:
+    toc:s
+  html_document:
+    default
+  pdf_document:
+    default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Importação do ficheiro de Excel
+```{r}
+library(openxlsx)
+bd <- read.xlsx("CP12_Ecologia_Final.xlsx", sheet = "Dados_Eco1")
+
+# Questão 2 - Mudar nomes de 2 variáveis
+colnames(bd)[2] <- c("incendios_florestais")
+colnames(bd)[3] <- c("Acidentes_trabalho")
+colnames(bd)[4] <- c("Poluicao_rios")
+colnames(bd)[5] <- c("Poluicao_praias")
+colnames(bd)[6] <- c("Ma_qualidade_ar")
+colnames(bd)[7] <- c("Utilizacao_pesticidas")
+colnames(bd)[8] <- c("Efeito_estufa")
+colnames(bd)[9] <- c("Reciclagem_lixos")
+colnames(bd)[10] <- c("Destruicao_florestas")
+
+# Questão 3 - Procurar valores omissos
+bd$ID[which(is.na(bd$idade))]
+
+# Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
+bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm=TRUE))
+bd$preoc_ambiente[which(is.na(bd$preoc_ambiente))] <- c(median(bd$preoc_ambiente, na.rm=TRUE))
+
+#correção dos valores omissos para NA
+bd$incendios_florestais[which(bd$incendios_florestais == 99)] <- c(NA)
+
+
+# Analisar descritivamente  os dados(uni e bivariada), incluindo:
+# a)tabelas de frequências com valores abslutos e percentagens
+tabela <- table(bd$incendios_florestais)
+tabelapercentagens <- round(prop.table(tabela)*100, digits = 2)
+tabela
+tabelapercentagens
+
+# b) medidasdescritivas de variáveis quantitativas
+summary(bd$idade)
+summary(bd$preoc_ambiente)
+```
+
+
+# Valores omissos
+
+Existiam 3 valores omissos na idade que foram substituídos pela mediana.
+```{r echo=TRUE}
+# Questão 3 - Procurar valores omissos
+bd$ID[which(is.na(bd$idade))]
+
+# Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
+bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm=TRUE))
+```
+
+
+Quanto à preocupação ambiental, foram encontrados 2 valores omissos que tal como no caso anterior foram subtituídos pela mediana.
+```{r echo=TRUE}
+# Questão 3 - Procurar valores omissos
+bd$ID[which(is.na(bd$preoc_ambiente))]
+
+# Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
+bd$preoc_ambiente[which(is.na(bd$preoc_ambiente))] <- c(median(bd$preoc_ambiente, na.rm=TRUE))
+```
+
+
+# Caracterização da População
+
+Caracterização da Idade
+```{r echo=TRUE}
+# c)gráficos (incluindo gráficos de distribuição)
+boxplot(bd$idade, ylab = "Idade", main = "Distribuição das idades", col="light blue", ylim = c(0,100))
+abline(h=mean(bd$idade, na.rm = TRUE), lty="dashed", lwd="0.1", col="grey")
+```
+
+#Questão 5c) Sexo e Idade
+```{r echo=TRUE}
+library(ggplot2)
+
+#hist(bd$idade[which(bd$sexotexto=="Masculino")],breaks=c(0,18,24,50,75,100), main="Distribuição das Idades pelo sexo Masculino")
+par(mfrow=c(1,2))
+hist(bd$idade[which(bd$sexotexto=="Masculino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="lightblue", xlab = "Idade", ylab = "Frequencia (n)", main = "Distribuição das Idades pelo sexo Masculino", labels = TRUE)
+
+hist(bd$idade[which(bd$sexotexto=="Feminino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="pink", xlab = "Idade", ylab = "Frequencia (n)", main = "Distribuição das Idades pelo sexo Feminino", labels = TRUE)
+par(mfrow=c(1,1))
+
+
+```
+
+
+Caracterização da Filhos, Automóvel, Rendimento e Habilitações
+```{r}
+bp <- barplot(table(bd$filhostexto),ylim = c(0, 300), col="lightgreen", xlab = "Filhos", ylab = "Frequencia (n)", main = "Frequência de inquiridos com e sem filhos")
+text(bp, c(200, 145), table(bd$filhostexto), cex=1, pos = 3)
+
+
+bp1 <- barplot(table(bd$automovel),ylim = c(0, 300), col="lightgreen", xlab = "Automóvel", ylab = "Frequencia (n)", main = "Frequência de inquiridos com e sem automóvel")
+text(bp1, c(200, 145), table(bd$automovel), cex=1, pos = 3)
+
+
+bp2 <- barplot(table(bd$habilitacoestexto),ylim = c(0, 300), col="lightgreen", xlab = "Habilitações", ylab = "Frequencia (n)", main = "Frequência de inquiridos com habilitações")
+text(bp2, c(128, 145, 78), table(bd$habilitacoestexto), cex=1, pos = 3)
+
+
+bp3 <- barplot(table(bd$rendimento)[c(5,1,3,4,2)], ylim = c(0, 250), col="lightgreen", xlab = "Rendimento", ylab = "Frequencia (n)", main = "Distribuição das frequências de rendimento")
+text(bp3, table(bd$rendimento)[c(5,1,3,4,2)] + 1, table(bd$rendimento)[c(5,1,3,4,2)], cex=1, pos = 3)
+
+```
+
+
+
+#Texto intermédio - Caracterização da população
+
+
+#Ideas
+*Preocupação ambiental + Efeito de estufa
+
+
+
+
+
+
+
+
