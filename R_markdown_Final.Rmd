@@ -12,12 +12,17 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+install.packages("flextable")
 ```
 
 # Importação do ficheiro de Excel
 ```{r}
+library(flextable)
+library(knitr)
 library(openxlsx)
-bd <- read.xlsx("CP12_Ecologia_Final.xlsx", sheet = "Dados_Eco1")
+library(ggplot2)
+
+bd <- read.xlsx("CP12_Ecologia_final.xlsx", sheet = "Dados_Eco1")
 
 # Questão 2 - Mudar nomes de 2 variáveis
 colnames(bd)[2] <- c("incendios_florestais")
@@ -30,17 +35,10 @@ colnames(bd)[8] <- c("Efeito_estufa")
 colnames(bd)[9] <- c("Reciclagem_lixos")
 colnames(bd)[10] <- c("Destruicao_florestas")
 
-# Questão 3 - Procurar valores omissos
-bd$ID[which(is.na(bd$idade))]
-
-# Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
-bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm=TRUE))
-bd$preoc_ambiente[which(is.na(bd$preoc_ambiente))] <- c(median(bd$preoc_ambiente, na.rm=TRUE))
-
-#correção dos valores omissos para NA
+#correção dos valores omissos de 99 para NA, no caso da 1ª variável
 bd$incendios_florestais[which(bd$incendios_florestais == 99)] <- c(NA)
 
-
+print(c("Número de registos da amostra:", nrow(bd)))
 # Analisar descritivamente  os dados(uni e bivariada), incluindo:
 # a)tabelas de frequências com valores abslutos e percentagens
 tabela <- table(bd$incendios_florestais)
@@ -48,18 +46,19 @@ tabelapercentagens <- round(prop.table(tabela)*100, digits = 2)
 tabela
 tabelapercentagens
 
-# b) medidasdescritivas de variáveis quantitativas
-summary(bd$idade)
-summary(bd$preoc_ambiente)
 ```
 
 
 # Valores omissos
 
-Existiam 3 valores omissos na idade que foram substituídos pela mediana.
+Existiam 3 valores omissos na idade que foram substituídos pela mediana das idades.
 ```{r echo=TRUE}
 # Questão 3 - Procurar valores omissos
-bd$ID[which(is.na(bd$idade))]
+agedf <- as.data.frame(bd$ID[which(is.na(bd$idade))])
+ageft <- flextable(agedf)
+ageft <- set_header_labels(ageft,`bd$ID[which(is.na(bd$idade))]`="Id")
+ageft
+print(c("Mediana da idade= ", median(bd$idade, na.rm=TRUE)))
 
 # Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
 bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm=TRUE))
@@ -69,8 +68,12 @@ bd$idade[which(is.na(bd$idade))] <- c(median(bd$idade, na.rm=TRUE))
 Quanto à preocupação ambiental, foram encontrados 2 valores omissos que tal como no caso anterior foram subtituídos pela mediana.
 ```{r echo=TRUE}
 # Questão 3 - Procurar valores omissos
-bd$ID[which(is.na(bd$preoc_ambiente))]
+agedf <- as.data.frame(bd$ID[which(is.na(bd$preoc_ambiente))])
+ageft <- flextable(agedf)
+ageft <- set_header_labels(ageft,`bd$ID[which(is.na(bd$preoc_ambiente))]`="Id")
+ageft
 
+print(c("Mediana da preocupação ambiental= ", median(bd$preoc_ambiente, na.rm=TRUE)))
 # Questão 4 - Imputar valores omissos de uma variável com a mediana dos seus valores
 bd$preoc_ambiente[which(is.na(bd$preoc_ambiente))] <- c(median(bd$preoc_ambiente, na.rm=TRUE))
 ```
@@ -81,20 +84,26 @@ bd$preoc_ambiente[which(is.na(bd$preoc_ambiente))] <- c(median(bd$preoc_ambiente
 Caracterização da Idade
 ```{r echo=TRUE}
 # c)gráficos (incluindo gráficos de distribuição)
-boxplot(bd$idade, ylab = "Idade", main = "Distribuição das idades", col="light blue", ylim = c(0,100))
+boxplot(bd$idade, ylab = "Idade", main = "Distribuição das idades", col="light blue", ylim = c(0,100), boxwex=0.2)
 abline(h=mean(bd$idade, na.rm = TRUE), lty="dashed", lwd="0.1", col="grey")
 ```
+```{r}
+# b) medidasdescritivas de variáveis quantitativas
+summary(bd$idade)
+```
+
 
 #Questão 5c) Sexo e Idade
+
+Distribuição das Idades pelo sexo:
 ```{r echo=TRUE}
-library(ggplot2)
 
 #hist(bd$idade[which(bd$sexotexto=="Masculino")],breaks=c(0,18,24,50,75,100), main="Distribuição das Idades pelo sexo Masculino")
 par(mfrow=c(1,2))
-hist(bd$idade[which(bd$sexotexto=="Masculino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="lightblue", xlab = "Idade", ylab = "Frequencia (n)", main = "Distribuição das Idades pelo sexo Masculino", labels = TRUE)
+hist(bd$idade[which(bd$sexotexto=="Masculino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="lightblue", xlab = "Idade", ylab = "Frequencia (n)", main="Masculino", labels = TRUE)
 
-hist(bd$idade[which(bd$sexotexto=="Feminino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="pink", xlab = "Idade", ylab = "Frequencia (n)", main = "Distribuição das Idades pelo sexo Feminino", labels = TRUE)
-par(mfrow=c(1,1))
+hist(bd$idade[which(bd$sexotexto=="Feminino")], ylim = c(0, 120), xlim = c(0,100),breaks = c(0,20,40,60,80,100), col="pink", xlab = "Idade", ylab = "Frequencia (n)", main="Feminino", labels = TRUE)
+ par(mfrow=c(1,1))
 
 
 ```
